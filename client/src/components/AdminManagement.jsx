@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Container, Table, Button, Dropdown } from "react-bootstrap";
 import { ThemeContext } from "../context/ThemeContext";
-import { User, Trash2, Edit } from "lucide-react";
+import { User, Edit } from "lucide-react"; // Removed Trash2 since we're replacing Delete
 import axios from "axios";
 
 // Roles array
@@ -30,13 +30,17 @@ const UserManagement = () => {
     }
   };
 
-  const deleteUser = async (email) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
+  const toggleUserStatus = async (email, currentStatus) => {
+    if (window.confirm(`Are you sure you want to ${currentStatus === 'enable' ? 'disable' : 'enable'} this user?`)) {
       try {
         await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/users/delete`, { data: { email } });
-        setUsers(prev => prev.filter(user => user.email !== email));
+        setUsers(prev =>
+          prev.map(user =>
+            user.email === email ? { ...user, status: currentStatus === 'enable' ? 'disable' : 'enable' } : user
+          )
+        );
       } catch {
-        alert("Failed to delete user");
+        alert("Failed to toggle user status");
       }
     }
   };
@@ -73,6 +77,9 @@ const UserManagement = () => {
                 <th className="px-4 py-3 text-start" style={{ fontWeight: 600, borderBottom: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`, minWidth: "150px" }}>
                   Role
                 </th>
+                <th className="px-4 py-3 text-start" style={{ fontWeight: 600, borderBottom: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`, minWidth: "150px" }}>
+                  Status
+                </th>
                 <th className="px-4 py-3 text-center" style={{ fontWeight: 600, borderBottom: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`, minWidth: "200px" }}>
                   Actions
                 </th>
@@ -81,7 +88,7 @@ const UserManagement = () => {
             <tbody style={{ backgroundColor: "transparent" }}>
               {paginatedUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-4 py-3 text-center" style={{ color: theme === "dark" ? "#fff" : "#333" }}>
+                  <td colSpan={4} className="px-4 py-3 text-center" style={{ color: theme === "dark" ? "#fff" : "#333" }}>
                     No users found.
                   </td>
                 </tr>
@@ -113,6 +120,19 @@ const UserManagement = () => {
                         }}
                       >
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 align-middle">
+                      <span
+                        className="badge rounded-pill px-3 py-2 fw-semibold"
+                        style={{
+                          backgroundColor: user.status === 'enable' ? '#d4edda' : '#f8d7da',
+                          border: `1px solid ${user.status === 'enable' ? '#c3e6cb' : '#f5c6cb'}`,
+                          color: user.status === 'enable' ? '#155724' : '#721c24',
+                          fontSize: "0.9rem"
+                        }}
+                      >
+                        {user.status ? user.status.charAt(0).toUpperCase() + user.status.slice(1) : "Unknown"}
                       </span>
                     </td>
                     <td className="px-4 py-3 align-middle text-center">
@@ -149,14 +169,13 @@ const UserManagement = () => {
                           </Dropdown.Menu>
                         </Dropdown>
                         <Button
-                          variant="outline-danger"
+                          variant={user.status === 'enable' ? 'outline-danger' : 'outline-success'}
                           size="sm"
                           className="d-flex align-items-center"
                           style={{ fontWeight: 500 }}
-                          onClick={() => deleteUser(user.email)}
+                          onClick={() => toggleUserStatus(user.email, user.status)}
                         >
-                          <Trash2 size={16} className="me-1" />
-                          Delete
+                          {user.status === 'enable' ? 'Disable' : 'Enable'}
                         </Button>
                       </div>
                     </td>

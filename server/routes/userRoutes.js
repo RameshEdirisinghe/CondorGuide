@@ -109,7 +109,7 @@ router.put('/update-role', async (req, res) => {
 
 // List users
 router.get('/users', async (req, res) => {
-  const users = await User.find({}, 'email role');
+  const users = await User.find({}, 'email role status');
   res.json(users);
 });
 
@@ -272,7 +272,6 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-// Delete User
 router.delete('/delete', async (req, res) => {
   try {
     const { email } = req.body;
@@ -287,15 +286,19 @@ router.delete('/delete', async (req, res) => {
     }
 
     if (user.role === 'superadmin') {
-      return res.status(403).json({ message: 'Cannot delete superadmin account.' });
+      return res.status(403).json({ message: 'Cannot change status of superadmin account.' });
     }
 
-    await User.deleteOne({ email });
+    // Toggle status between 'enable' and 'disable'
+    const newStatus = user.status === 'enable' ? 'disable' : 'enable';
+    user.status = newStatus;
 
-    res.status(200).json({ message: 'User deleted successfully.' });
+    await user.save();
+
+    res.status(200).json({ message: `User status changed to ${newStatus}.` });
   } catch (err) {
-    console.error('Delete user error:', err);
-    res.status(500).json({ message: 'Failed to delete user.', error: err.message });
+    console.error('Toggle user status error:', err);
+    res.status(500).json({ message: 'Failed to toggle user status.', error: err.message });
   }
 });
 
