@@ -77,9 +77,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const user = await User.findOne({ email, password });
+    const user = await User.findOne({ email, password});
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
+    }
+    if (user.status === 'disable') {
+      return res.status(401).json({ message: 'user disabled by admin' });
     }
 
     const token = generateToken(user);
