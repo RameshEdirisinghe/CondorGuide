@@ -10,6 +10,8 @@ const roles = ['user', 'security', 'maintenance', 'admin', 'superadmin'];
 const UserManagement = () => {
   const { theme } = useContext(ThemeContext);
   const [users, setUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 10;
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users/users`)
@@ -38,6 +40,13 @@ const UserManagement = () => {
       }
     }
   };
+
+  // Pagination logic
+  const totalPages = Math.ceil(users.length / usersPerPage);
+  const paginatedUsers = users.slice(
+    (currentPage - 1) * usersPerPage,
+    currentPage * usersPerPage
+  );
 
   return (
     <main className="py-4 py-md-5" style={{ minHeight: "100vh", backgroundColor: "transparent" }}>
@@ -70,85 +79,116 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody style={{ backgroundColor: "transparent" }}>
-              {users.map(user => (
-                <tr
-                  key={user.email}
-                  style={{
-                    borderBottom: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`,
-                    backgroundColor: "transparent"
-                  }}
-                >
-                  <td className="px-4 py-3 align-middle">
-                    <div className="d-flex align-items-center">
-                      <User size={18} className="me-2" style={{ color: "#B68E0C" }} />
-                      <span className={theme === "dark" ? "text-white" : "text-black"} style={{ wordBreak: "break-all" }}>
-                        {user.email}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 align-middle">
-                    <span
-                      className="badge rounded-pill px-3 py-2 fw-semibold"
-                      style={{
-                        backgroundColor: "transparent",
-                        border: `1px solid ${theme === "dark" ? "#fff" : "#333"}`,
-                        color: theme === "dark" ? "#fff" : "#333",
-                        fontSize: "0.9rem"
-                      }}
-                    >
-                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 align-middle text-center">
-                    <div className="d-flex justify-content-center gap-2 flex-wrap">
-                      <Dropdown>
-                        <Dropdown.Toggle
-                          variant="outline"
-                          size="sm"
-                          className="d-flex align-items-center"
-                          style={{
-                            borderColor: "#B68E0C",
-                            color: "#B68E0C",
-                            fontWeight: 500
-                          }}
-                        >
-                          <Edit size={16} className="me-1" />
-                          Edit Role
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu
-                          className={theme === "dark" ? "bg-dark border-dark" : "bg-white border-light"}
-                          style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
-                        >
-                          {roles.filter(role => role !== 'superadmin').map((role, idx) => (
-                            <Dropdown.Item
-                              key={idx}
-                              className={theme === "dark" ? "text-white" : "text-black"}
-                              active={user.role === role}
-                              onClick={() => updateRole(user.email, role)}
-                              style={{ fontWeight: 500 }}
-                            >
-                              {role.charAt(0).toUpperCase() + role.slice(1)}
-                            </Dropdown.Item>
-                          ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        className="d-flex align-items-center"
-                        style={{ fontWeight: 500 }}
-                        onClick={() => deleteUser(user.email)}
-                      >
-                        <Trash2 size={16} className="me-1" />
-                        Delete
-                      </Button>
-                    </div>
+              {paginatedUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="px-4 py-3 text-center" style={{ color: theme === "dark" ? "#fff" : "#333" }}>
+                    No users found.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                paginatedUsers.map(user => (
+                  <tr
+                    key={user.email}
+                    style={{
+                      borderBottom: `1px solid ${theme === "dark" ? "#444" : "#ddd"}`,
+                      backgroundColor: "transparent"
+                    }}
+                  >
+                    <td className="px-4 py-3 align-middle">
+                      <div className="d-flex align-items-center">
+                        <User size={18} className="me-2" style={{ color: "#B68E0C" }} />
+                        <span className={theme === "dark" ? "text-white" : "text-black"} style={{ wordBreak: "break-all" }}>
+                          {user.email}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 align-middle">
+                      <span
+                        className="badge rounded-pill px-3 py-2 fw-semibold"
+                        style={{
+                          backgroundColor: "transparent",
+                          border: `1px solid ${theme === "dark" ? "#fff" : "#333"}`,
+                          color: theme === "dark" ? "#fff" : "#333",
+                          fontSize: "0.9rem"
+                        }}
+                      >
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 align-middle text-center">
+                      <div className="d-flex justify-content-center gap-2 flex-wrap">
+                        <Dropdown>
+                          <Dropdown.Toggle
+                            variant="outline"
+                            size="sm"
+                            className="d-flex align-items-center"
+                            style={{
+                              borderColor: "#B68E0C",
+                              color: "#B68E0C",
+                              fontWeight: 500
+                            }}
+                          >
+                            <Edit size={16} className="me-1" />
+                            Edit Role
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu
+                            className={theme === "dark" ? "bg-dark border-dark" : "bg-white border-light"}
+                            style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
+                          >
+                            {roles.filter(role => role !== 'superadmin').map((role, idx) => (
+                              <Dropdown.Item
+                                key={idx}
+                                className={theme === "dark" ? "text-white" : "text-black"}
+                                active={user.role === role}
+                                onClick={() => updateRole(user.email, role)}
+                                style={{ fontWeight: 500 }}
+                              >
+                                {role.charAt(0).toUpperCase() + role.slice(1)}
+                              </Dropdown.Item>
+                            ))}
+                          </Dropdown.Menu>
+                        </Dropdown>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="d-flex align-items-center"
+                          style={{ fontWeight: 500 }}
+                          onClick={() => deleteUser(user.email)}
+                        >
+                          <Trash2 size={16} className="me-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </Table>
         </div>
+
+        <nav className="mt-4">
+          <ul className="pagination justify-content-center">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <li
+                key={i}
+                className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+              >
+                <button
+                  className="page-link"
+                  style={{
+                    backgroundColor: currentPage === i + 1 ? "#B68E0C" : "transparent",
+                    color: currentPage === i + 1 ? "#fff" : theme === "dark" ? "#fff" : "#333",
+                    borderColor: theme === "dark" ? "#444" : "#ddd",
+                  }}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </Container>
     </main>
   );
