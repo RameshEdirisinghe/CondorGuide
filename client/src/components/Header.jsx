@@ -137,11 +137,10 @@ const Header = () => {
               )}
               {user?.role === "superadmin" && (
                 <>
-                  <Nav.Link href="/admin-management" className={`nav-link-custom ${isActive("/admin-management") && "active"}`}>Admin Management</Nav.Link>
+                  <Nav.Link href="/admin-management" className={`nav-link-custom ${isActive("/admin-management") && "active"}`}>User Management</Nav.Link>
                   <Nav.Link href="/issue-management" className={`nav-link-custom ${isActive("/issue-management") && "active"}`}>Issue Management</Nav.Link>
                   <Nav.Link href="/classroom-management" className={`nav-link-custom ${isActive("/classroom-management") && "active"}`}>Classroom Management</Nav.Link>
                   <Nav.Link href="/security-alerts" className={`nav-link-custom ${isActive("/security-alerts") && "active"}`}>Security Alert Management</Nav.Link>
-                  <Nav.Link href="/user-management" className={`nav-link-custom ${isActive("/user-management") && "active"}`}>User Management</Nav.Link>
                 </>
               )}
               {user?.role === "security" && (
