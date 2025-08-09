@@ -118,7 +118,7 @@ const IssueManagement = () => {
       <Container className="p-3 p-md-4" style={{ backgroundColor: "transparent" }}>
         <div className="text-center mb-4 mb-md-5">
           <h1 className={`display-6 fw-bold ${theme === "dark" ? "text-white" : "text-black"}`}>
-            Issue <span style={{ color: "#B68E0C" }}>Report Management</span>
+            Issue Report <span style={{ color: "#B68E0C" }}>Management</span>
           </h1>
           <p className={`lead ${theme === "dark" ? "text-light" : "text-muted"}`}>
             Efficiently manage reported issues and their statuses.
