@@ -19,20 +19,35 @@ const generateToken = (user) => {
   );
 };
 
-// Register
+//register
 router.post('/signUp', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
+    const { email, password, firstName, lastName } = req.body;
+
+    // Validate required fields
+    if (!email || !password || !firstName || !lastName) {
+      return res.status(400).json({ message: 'All fields (email, password, firstName, lastName) are required' });
     }
 
+    // Check if user with email already exists
     const userExist = await User.findOne({ email });
     if (userExist) {
-      return res.status(409).json({ message: 'User already exists' });
+      return res.status(409).json({ message: 'User with this email already exists' });
     }
 
-    const newUser = new User({ email, password });
+    // Check if firstName or lastName already exists
+    const nameExist = await User.findOne({
+      $or: [
+        { firstName: { $regex: new RegExp(`^${firstName}$`, 'i') } },
+        { lastName: { $regex: new RegExp(`^${lastName}$`, 'i') } }
+      ]
+    });
+    if (nameExist) {
+      return res.status(409).json({ message: 'A user with this first name or lastName already exists' });
+    }
+
+    // Create new user
+    const newUser = new User({ email, password, firstName, lastName });
     await newUser.save();
 
     const token = generateToken(newUser);
@@ -42,7 +57,9 @@ router.post('/signUp', async (req, res) => {
       user: {
         _id: newUser._id,
         email: newUser.email,
-        role: newUser.role
+        role: newUser.role,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName
       },
       token
     });
