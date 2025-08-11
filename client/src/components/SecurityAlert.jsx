@@ -33,9 +33,9 @@ const SecurityAlert = () => {
   }, []);
 
   const loadAlerts = async () => {
-    console.log("[API] loadAlerts: Sending GET /api/security-alerts");
+    console.log(`[API] loadAlerts: Sending GET ${import.meta.env.VITE_API_BASE_URL}/api/security-alerts`);
     try {
-      const res = await axios.get("/api/security-alerts/", { headers });
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/security-alerts`, { headers });
       console.log("[API] loadAlerts: Response received", res.data);
       setAlerts(Array.isArray(res.data) ? res.data : []);
       setError(null);
@@ -53,7 +53,7 @@ const SecurityAlert = () => {
     console.log("[API] sendAlert: Sending POST /api/security-alerts with payload:", payload);
 
     try {
-      const res = await axios.post("/api/security-alerts", payload, { headers });
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/security-alerts`, payload, { headers });
       console.log("[API] sendAlert: Alert sent successfully", res.data);
       setError(null);
       await loadAlerts();
